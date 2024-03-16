@@ -1,43 +1,29 @@
 from django.contrib.auth.models import AbstractUser
-from django.db.models import CharField, EmailField, ImageField, BooleanField, ForeignKey, CASCADE, IntegerField, Model, \
-    DateTimeField, FloatField, PositiveIntegerField, TextField
-from django_ckeditor_5.fields import CKEditor5Field
-
-
-class CreatedBaseModel(Model):
-    updated_at = DateTimeField(auto_now=True)
-    created_at = DateTimeField(auto_now_add=True)
-
-    class Meta:
-        abstract = True
+from django.db.models import Model, CharField, ForeignKey, TextField, CASCADE, DecimalField, UUIDField
+from django_resized import ResizedImageField
+import uuid
 
 
 class User(AbstractUser):
-    username = CharField(max_length=150, null=True, blank=True, unique=True)
-    email = EmailField(unique=True)
-    phone = CharField(max_length=25, null=True, blank=True)
-    image = ImageField(upload_to='users/%Y/%m', null=True, blank=True)
-    is_deleted = BooleanField(default=False)
+    uuid = UUIDField(primary_key=True, default=uuid.uuid4)
 
 
-class Category(CreatedBaseModel):
-    name = CharField(max_length=255)
-
-    def __str__(self):
-        return self.name
+class Category(Model):
+    uuid = UUIDField(primary_key=True, default=uuid.uuid4)
+    name = CharField(max_length=100)
 
 
-class Product(CreatedBaseModel):
-    owner = ForeignKey(User, on_delete=CASCADE)
-    name = CharField(max_length=255)
+class Product(Model):
+    uuid = UUIDField(primary_key=True, default=uuid.uuid4)
+    name = CharField(max_length=100)
+    category = ForeignKey(Category, related_name='products', on_delete=CASCADE)
     description = TextField()
-    image = ImageField(upload_to='products/')
-    category = ForeignKey('apps.Category', on_delete=CASCADE)
-
-    def __str__(self):
-        return self.name
+    price = DecimalField(max_digits=10, decimal_places=2)
+    owner = CharField(max_length=100)
 
 
-# class ProductImage(CreatedBaseModel):
-#     image = ImageField(upload_to='media/images/')
-#     product = ForeignKey('apps.Product', CASCADE)
+class ProductPhoto(Model):
+    uuid = UUIDField(primary_key=True, default=uuid.uuid4)
+    product = ForeignKey(Product, related_name='photos', on_delete=CASCADE)
+    image = ResizedImageField(size=[736, 736], crop=['middle', 'center'], upload_to='products', blank=True,
+                              null=True)
