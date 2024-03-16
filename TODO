@@ -1,0 +1,4 @@
+1. docker run --name shohjahon -e POSTGRES_PASSWORD=1 -p 5431:5432 -v pgdata:/var/lib/postgresql/data -d postgres:alpine
+2. docker exec -it shohjahon psql -U postgres
+3. CREATE USER shohjahon WITH PASSWORD '1' CREATEDB CREATEROLE;
+4. ALTER USER shohjahon WITH PASSWORD '1';
